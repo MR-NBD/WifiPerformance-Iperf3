@@ -1,4 +1,4 @@
 argparse==1.4.0
-iperf3==0.1.11
 subprocess.run==0.0.8
 colorama==0.4.6
+datetime==5.5.0
