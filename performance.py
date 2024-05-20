@@ -10,18 +10,19 @@ def perf(options, protocol, receive, port):
     # Esegui il comando iperf3 e cattura l'output
     if protocol == "udp":
         result = subprocess.run(
-            ["iperf3", "-c", options.address, port, "-u", "-b", "50M", receive],
+            ["iperf3", "-c", options.address, port, "--cport", "55720", "-u", "-b", "50M", receive],
             capture_output=True,
             text=True,
         )
         # Controlla se il comando è stato eseguito con successo
         if result.returncode == 0:
             output = result.stdout
-
+            list = str.splitlines(output)
+            
             # Utilizza regex per trovare i Bitrate del sender e del receiver
             sender_bitrate = re.search(
-                r"\[\s*\d+\]\s+\d+\.\d+-\d+\.\d+\s+sec\s+\d+\sMBytes\s+(\d+\.\d+)\sMbits/sec",
-                output,
+                r"MBytes  ([+-]?(?=\.\d|\d)(?:\d+)?(?:\.?\d*))(?:[Ee]([+-]?\d+))? Mbits/sec",
+                list[16],
             )
 
             return float(sender_bitrate.group(1))
@@ -33,7 +34,7 @@ def perf(options, protocol, receive, port):
 
     else:
         result = subprocess.run(
-            ["iperf3", "-c", options.address, port, receive],
+            ["iperf3", "-c", options.address, port, "--cport", "55720", receive],
             capture_output=True,
             text=True,
         )
@@ -66,6 +67,7 @@ def dump(options, protocol, receive, file):
                 options.interface,
                 "-w",
                 options.filename + file,
+                protocol,
             ],
             stdin=subprocess.PIPE,
         )
@@ -118,7 +120,7 @@ def main():
 
     print(Fore.BLUE + f"[+] TCP test" + Style.RESET_ALL)
     Min_TCP, Max_TCP, avg_TCP, std_dev_TCP = dump(
-        options, protocol="", receive="", file="-TCP"
+        options, protocol="tcp", receive="", file="-TCP"
     )
     print(Fore.BLUE + f"[+] UDP test" + Style.RESET_ALL)
     Min_UDP, Max_UDP, avg_UDP, std_dev_UDP = dump(
@@ -126,7 +128,7 @@ def main():
     )
     print(Fore.BLUE + f"[+] TCP test with receive instead of sending" + Style.RESET_ALL)
     Min_TCP_R, Max_TCP_R, avg_TCP_R, std_dev_TCP_R = dump(
-        options, protocol="", receive="-R", file="-TCP-R"
+        options, protocol="tcp", receive="-R", file="-TCP-R"
     )
     print(Fore.BLUE + f"[+] UDP with receive instead of sending" + Style.RESET_ALL)
     Min_UDP_R, Max_UDP_R, avg_UDP_R, std_dev_UDP_R = dump(
