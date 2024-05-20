@@ -6,10 +6,10 @@ import math
 from datetime import datetime
 
 
-def perf(options, protocol, receive):
+def perf(options, protocol, receive, port):
     # Esegui il comando iperf3 e cattura l'output
     result = subprocess.run(
-        ["iperf3", "-c", options.address, protocol, receive],
+        ["iperf3", "-c", options.address, port, protocol, receive],
         capture_output=True,
         text=True,
     )
@@ -50,11 +50,14 @@ def dump(options, protocol, receive, file):
         dump.stdin.flush()
 
         # Run iperf3 test
+        port = ""
+        if options.port != None:
+            port = "-p " + str(options.port)
 
         result = []
         # extract relevant data
-        for i in range(10):
-            result.append(perf(options, protocol, receive))
+        for i in range(2):
+            result.append(perf(options, protocol, receive, port))
             print(Fore.GREEN + f"[{i}] Sender Bitrate: {result[-1]}" + Style.RESET_ALL)
 
         Min = min(result)  # MIN
@@ -83,6 +86,7 @@ def main():
         "-i", "--interface", dest="interface", help="write the interface"
     )
     parser.add_argument("-a", "--address", dest="address", help="write the address")
+    parser.add_argument("-p", "--port", dest="port", help="write the port number")
 
     options = parser.parse_args()
     # Calcola la data e l'ora corrente
