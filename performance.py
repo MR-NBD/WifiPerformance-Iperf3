@@ -8,11 +8,18 @@ from datetime import datetime
 
 def perf(options, protocol, receive, port):
     # Esegui il comando iperf3 e cattura l'output
-    result = subprocess.run(
-        ["iperf3", "-c", options.address, port, protocol, receive],
-        capture_output=True,
-        text=True,
-    )
+    if (protocol == "udp"):
+        result = subprocess.run(
+            ["iperf3", "-c", options.address, port, "-u","-b","50M", receive],
+            capture_output=True,
+            text=True,
+        )
+    else:
+        result = subprocess.run(
+            ["iperf3", "-c", options.address, port, receive],
+            capture_output=True,
+            text=True,
+        )
 
     # Controlla se il comando è stato eseguito con successo
     if result.returncode == 0:
@@ -44,6 +51,7 @@ def dump(options, protocol, receive, file):
                 options.interface,
                 "-w",
                 options.filename + file,
+                
             ],
             stdin=subprocess.PIPE,
         )
@@ -96,11 +104,11 @@ def main():
 
     print(Fore.BLUE + f"[+] TCP test" + Style.RESET_ALL)
     Min_TCP, Max_TCP, avg_TCP, std_dev_TCP = dump(
-        options, protocol="", receive="-R", file="-TCP"
+        options, protocol="", receive="", file="-TCP"
     )
     print(Fore.BLUE + f"[+] UDP test" + Style.RESET_ALL)
     Min_UDP, Max_UDP, avg_UDP, std_dev_UDP = dump(
-        options, protocol="-i 1 -u -b 50M", receive="", file="-UDP"
+        options, protocol="udp", receive="", file="-UDP"
     )
     print(Fore.BLUE + f"[+] TCP test with receive instead of sending" + Style.RESET_ALL)
     Min_TCP_R, Max_TCP_R, avg_TCP_R, std_dev_TCP_R = dump(
@@ -108,7 +116,7 @@ def main():
     )
     print(Fore.BLUE + f"[+] UDP with receive instead of sending" + Style.RESET_ALL)
     Min_UDP_R, Max_UDP_R, avg_UDP_R, std_dev_UDP_R = dump(
-        options, protocol="-i 1 -u -b 50M", receive="-R", file="-UDP-R"
+        options, protocol="udp", receive="-R", file="-UDP-R"
     )
 
     print(Fore.BLUE + f"|----------- FINAL RESULT -----------|")
