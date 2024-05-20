@@ -20,7 +20,8 @@ def perf(options, protocol, receive, port):
 
         # Utilizza regex per trovare i Bitrate del sender e del receiver
         sender_bitrate = re.search(
-            r"\[.*\]\s+0.00-10.00\s+sec\s+.*\s+(\d+\.\d)+ Gbits/sec", output
+            r"\[\s*\d+\]\s+\d+\.\d+-\d+\.\d+\s+sec\s+\d+\sMBytes\s+(\d+\.\d+)\sMbits/sec",
+            output,
         )
 
         return float(sender_bitrate.group(1))
@@ -56,7 +57,7 @@ def dump(options, protocol, receive, file):
 
         result = []
         # extract relevant data
-        for i in range(2):
+        for i in range(10):
             result.append(perf(options, protocol, receive, port))
             print(Fore.GREEN + f"[{i}] Sender Bitrate: {result[-1]}" + Style.RESET_ALL)
 
