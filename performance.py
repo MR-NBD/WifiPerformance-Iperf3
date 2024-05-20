@@ -8,35 +8,50 @@ from datetime import datetime
 
 def perf(options, protocol, receive, port):
     # Esegui il comando iperf3 e cattura l'output
-    if (protocol == "udp"):
+    if protocol == "udp":
         result = subprocess.run(
-            ["iperf3", "-c", options.address, port, "-u","-b","50M", receive],
+            ["iperf3", "-c", options.address, port, "-u", "-b", "50M", receive],
             capture_output=True,
             text=True,
         )
+        # Controlla se il comando è stato eseguito con successo
+        if result.returncode == 0:
+            output = result.stdout
+
+            # Utilizza regex per trovare i Bitrate del sender e del receiver
+            sender_bitrate = re.search(
+                r"\[\s*\d+\]\s+\d+\.\d+-\d+\.\d+\s+sec\s+\d+\sMBytes\s+(\d+\.\d+)\sMbits/sec",
+                output,
+            )
+
+            return float(sender_bitrate.group(1))
+        else:
+            print(
+                Fore.RED
+                + f"[-] Error executing the iperf3 command. Error message: {result.stderr}"
+            )
+
     else:
         result = subprocess.run(
             ["iperf3", "-c", options.address, port, receive],
             capture_output=True,
             text=True,
         )
+        if result.returncode == 0:
+            output = result.stdout
 
-    # Controlla se il comando è stato eseguito con successo
-    if result.returncode == 0:
-        output = result.stdout
+            # Utilizza regex per trovare i Bitrate del sender e del receiver
+            sender_bitrate = re.search(
+                r"\d+\.\d+-\d+\.\d+\s+sec\s+\d+\.\d+\sMBytes\s+(\d+\.\d+)\sMbits/sec",
+                output,
+            )
 
-        # Utilizza regex per trovare i Bitrate del sender e del receiver
-        sender_bitrate = re.search(
-            r"\[\s*\d+\]\s+\d+\.\d+-\d+\.\d+\s+sec\s+\d+\sMBytes\s+(\d+\.\d+)\sMbits/sec",
-            output,
-        )
-
-        return float(sender_bitrate.group(1))
-    else:
-        print(
-            Fore.RED
-            + f"[-] Error executing the iperf3 command. Error message: {result.stderr}"
-        )
+            return float(sender_bitrate.group(1))
+        else:
+            print(
+                Fore.RED
+                + f"[-] Error executing the iperf3 command. Error message: {result.stderr}"
+            )
 
 
 def dump(options, protocol, receive, file):
@@ -51,7 +66,6 @@ def dump(options, protocol, receive, file):
                 options.interface,
                 "-w",
                 options.filename + file,
-                
             ],
             stdin=subprocess.PIPE,
         )
