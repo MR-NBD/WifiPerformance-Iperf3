@@ -22,10 +22,14 @@ def perf(options, protocol, receive, port):
             # Utilizza regex per trovare i Bitrate del sender e del receiver
             sender_bitrate = re.search(
                 r"MBytes  ([+-]?(?=\.\d|\d)(?:\d+)?(?:\.?\d*))(?:[Ee]([+-]?\d+))? Mbits/sec",
-                list[16],
+                list[-3],
             )
-
-            return float(sender_bitrate.group(1))
+            print(output)
+            print(list[-3])
+            if (sender_bitrate == None):
+                return perf(options, protocol, receive, port)
+            else:
+                return float(sender_bitrate.group(1))
         else:
             print(
                 Fore.RED
@@ -40,14 +44,19 @@ def perf(options, protocol, receive, port):
         )
         if result.returncode == 0:
             output = result.stdout
-
+            list = str.splitlines(output)
+            
             # Utilizza regex per trovare i Bitrate del sender e del receiver
             sender_bitrate = re.search(
-                r"\d+\.\d+-\d+\.\d+\s+sec\s+\d+\.\d+\sMBytes\s+(\d+\.\d+)\sMbits/sec",
-                output,
+                r"MBytes  ([+-]?(?=\.\d|\d)(?:\d+)?(?:\.?\d*))(?:[Ee]([+-]?\d+))? Mbits/sec",
+                list[-3],
             )
-
-            return float(sender_bitrate.group(1))
+            print(output)
+            print(list[-3])
+            if (sender_bitrate == None):
+                return perf(options, protocol, receive, port)
+            else:
+                return float(sender_bitrate.group(1))
         else:
             print(
                 Fore.RED
@@ -120,7 +129,7 @@ def main():
 
     print(Fore.BLUE + f"[+] TCP test" + Style.RESET_ALL)
     Min_TCP, Max_TCP, avg_TCP, std_dev_TCP = dump(
-        options, protocol="tcp", receive="", file="-TCP"
+     options, protocol="tcp", receive="", file="-TCP"
     )
     print(Fore.BLUE + f"[+] UDP test" + Style.RESET_ALL)
     Min_UDP, Max_UDP, avg_UDP, std_dev_UDP = dump(
