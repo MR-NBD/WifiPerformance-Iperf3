@@ -8,60 +8,58 @@ from datetime import datetime
 
 def perf(options, protocol, receive, port):
     # Esegui il comando iperf3 e cattura l'output
-    if protocol == "udp":
-        result = subprocess.run(
-            ["iperf3", "-c", options.address, port, "--cport", "55720", "-u", "-b", "50M", receive],
-            capture_output=True,
-            text=True,
-        )
+    attempts = 0
+    while attempts < 4:
+        attempts += 1
+        if protocol == "udp":
+            result = subprocess.run(
+                [
+                    "iperf3",
+                    "-c",
+                    options.address,
+                    port,
+                    "--cport",
+                    "55720",
+                    "-u",
+                    "-b",
+                    "50M",
+                    receive,
+                ],
+                capture_output=True,
+                text=True,
+            )
+        else:
+            result = subprocess.run(
+                ["iperf3", "-c", options.address, port, "--cport", "55720", receive],
+                capture_output=True,
+                text=True,
+            )
         # Controlla se il comando è stato eseguito con successo
         if result.returncode == 0:
             output = result.stdout
             list = str.splitlines(output)
-            
-            # Utilizza regex per trovare i Bitrate del sender e del receiver
-            sender_bitrate = re.search(
-                r"MBytes  ([+-]?(?=\.\d|\d)(?:\d+)?(?:\.?\d*))(?:[Ee]([+-]?\d+))? Mbits/sec",
-                list[-3],
-            )
-            print(output)
-            print(list[-3])
-            if (sender_bitrate == None):
-                return perf(options, protocol, receive, port)
-            else:
-                return float(sender_bitrate.group(1))
-        else:
-            print(
-                Fore.RED
-                + f"[-] Error executing the iperf3 command. Error message: {result.stderr}"
-            )
 
-    else:
-        result = subprocess.run(
-            ["iperf3", "-c", options.address, port, "--cport", "55720", receive],
-            capture_output=True,
-            text=True,
-        )
-        if result.returncode == 0:
-            output = result.stdout
-            list = str.splitlines(output)
-            
             # Utilizza regex per trovare i Bitrate del sender e del receiver
             sender_bitrate = re.search(
                 r"MBytes  ([+-]?(?=\.\d|\d)(?:\d+)?(?:\.?\d*))(?:[Ee]([+-]?\d+))? Mbits/sec",
                 list[-3],
             )
-            print(output)
-            print(list[-3])
-            if (sender_bitrate == None):
-                return perf(options, protocol, receive, port)
-            else:
-                return float(sender_bitrate.group(1))
+            # DEBUG
+            # print(output)
+            # print(list[-3])
+
+            if sender_bitrate:
+                try:
+                    return float(sender_bitrate.group(1))
+                except (ValueError, AttributeError) as e:
+                    print(Fore.RED + f"[-] Error parsing the bitrate: {e}")
         else:
             print(
                 Fore.RED
                 + f"[-] Error executing the iperf3 command. Error message: {result.stderr}"
             )
+    print(Fore.RED + f"[-] All 4° attempts failed.")
+    return None
 
 
 def dump(options, protocol, receive, file):
@@ -129,7 +127,7 @@ def main():
 
     print(Fore.BLUE + f"[+] TCP test" + Style.RESET_ALL)
     Min_TCP, Max_TCP, avg_TCP, std_dev_TCP = dump(
-     options, protocol="tcp", receive="", file="-TCP"
+        options, protocol="tcp", receive="", file="-TCP"
     )
     print(Fore.BLUE + f"[+] UDP test" + Style.RESET_ALL)
     Min_UDP, Max_UDP, avg_UDP, std_dev_UDP = dump(
