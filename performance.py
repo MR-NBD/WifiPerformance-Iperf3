@@ -7,7 +7,7 @@ from datetime import datetime
 
 
 def perf(options, protocol, receive, port):
-    # Esegui il comando iperf3 e cattura l'output
+    # Run the hyperf3 command and capture the output
     attempts = 0
     while attempts < 4:
         attempts += 1
@@ -34,12 +34,12 @@ def perf(options, protocol, receive, port):
                 capture_output=True,
                 text=True,
             )
-        # Controlla se il comando è stato eseguito con successo
+        # Check if the command was executed successfully
         if result.returncode == 0:
             output = result.stdout
             list = str.splitlines(output)
 
-            # Utilizza regex per trovare i Bitrate del sender e del receiver
+            # Use regex to find the bitrates of the sender and receiver
             sender_bitrate = re.search(
                 r"MBytes  ([+-]?(?=\.\d|\d)(?:\d+)?(?:\.?\d*))(?:[Ee]([+-]?\d+))? Mbits/sec",
                 list[-3],
@@ -121,7 +121,7 @@ def main():
     parser.add_argument("-p", "--port", dest="port", help="write the port number")
 
     options = parser.parse_args()
-    # Calcola la data e l'ora corrente
+    
     current_datetime = datetime.now()
     formatted_datetime = current_datetime.strftime("%Y-%m-%d %H:%M:%S")
 
@@ -163,10 +163,10 @@ def main():
     print(Style.RESET_ALL)
 
     with open(f"RESULT-{options.filename}.txt", "w") as file:
-        # Scrivi la data e l'ora corrente come prima riga
+      
         file.write(formatted_datetime + "\n")
 
-        # Scrivi il contenuto richiesto
+    
         file.write(f"|----------- FINAL RESULT -----------|\n")
         file.write(f"|       | Avg  | Min  | Max  | StdD  |\n")
         file.write(
