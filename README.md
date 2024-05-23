@@ -32,7 +32,7 @@ python3 performance.py -f <fileName> -i <NameInterface> -a <address> -p <portNum
 
 
 ### OUTPUT EXAMPLE of a correct execution
-
+```
           2024-05-21 10:39:06
 |----------- FINAL RESULT -----------|
 |       | Avg  | Min  | Max  | StdD  |
@@ -40,3 +40,4 @@ python3 performance.py -f <fileName> -i <NameInterface> -a <address> -p <portNum
 |  UDP  | 48.5 | 38.0 | 50.0 | 3.7   |
 | TCP_R | 29.3 | 22.4 | 32.2 | 3.2   |
 | UDP_R | 30.3 | 2.5 | 38.0 | 12.0   |
+```
