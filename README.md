@@ -1,19 +1,28 @@
 # WifiPerformance-Iperf3
-WiFI LAB Iperf3 performance evaluation POLITO
+## WiFI LAB Iperf3 performance evaluation POLITO
+This is a tool created to automatically manage a Wi-Fi Ethernet performance measurement simulation using the [Iperf](https://github.com/esnet/iperf) and [tcpdump](https://github.com/the-tcpdump-group/tcpdump) tools.
+
 
 ### INSTALLATION SET UP
-
+To ensure the tool functions correctly, make sure you have all dependencies installed.
 ---
 
-run this
+Run these commands for an GNU/Linux Debian environment.
 
 ```bash
 sudo apt install tcpdump
+sudo apt install iperf3
 pip install -r requirements.txt
 ```
 
-Per lanciare lo script digita :
+To run the script, type the command:
 
 ```bash
 python3 performance.py -f <fileName> -i <NameInterface> -a <address>
+```
+
+or 
+
+```bash
+python3 performance.py -f <fileName> -i <NameInterface> -a <address> -p <portNumber>[optional]
 ```
